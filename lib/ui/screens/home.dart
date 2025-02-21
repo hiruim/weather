@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:weather/config/text_styles.dart';
+import 'package:weather/ui/widgets/map.dart';
+import 'package:weather/ui/widgets/weather_card.dart';
 import 'package:weather/ui/widgets/weather_data.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -10,14 +10,10 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  late GoogleMapController _mapController;
-  LatLng _initialPosition = LatLng(48.8566, 2.3522); // Default location (Paris)
-  Marker? _marker;
-
   WeatherData weather = WeatherData(
     city: "Paris",
     temperature: "-7.7",
-    windSpeed: "3.8 (Feels colder)",
+    windSpeed: "3.8",
     midnightTemp: "-6.4",
     minTemp: "-8.6",
     morningTemp: "-8.2",
@@ -25,51 +21,6 @@ class _HomeScreenState extends State<HomeScreen> {
     eveningTemp: "-2.7",
     nightTemp: "-5.5",
   );
-
-  @override
-  void initState() {
-    super.initState();
-    _setMarker(_initialPosition);
-    _getCurrentLocation();
-  }
-
-  void _setMarker(LatLng position) {
-    setState(() {
-      _marker = Marker(
-        markerId: MarkerId('location'),
-        position: position,
-        infoWindow: InfoWindow(title: 'Selected Location'),
-        draggable: true,
-        onDragEnd: (newPosition) {
-          setState(() {
-            _initialPosition = newPosition;
-          });
-        },
-      );
-    });
-  }
-
-  Future<void> _getCurrentLocation() async {
-    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) return;
-
-    LocationPermission permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.deniedForever) return;
-    }
-
-    Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high);
-    LatLng currentLatLng = LatLng(position.latitude, position.longitude);
-
-    setState(() {
-      _initialPosition = currentLatLng;
-      _setMarker(currentLatLng);
-    });
-
-    _mapController.animateCamera(CameraUpdate.newLatLng(currentLatLng));
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -88,29 +39,13 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             Container(
               width: screenWidth * 0.9,
-              height: screenHeight * 0.4,
+              height: screenHeight * 0.6,
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(15),
                 border: Border.all(color: Colors.black),
               ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(15),
-                child: GoogleMap(
-                  initialCameraPosition:
-                      CameraPosition(target: _initialPosition, zoom: 14),
-                  onMapCreated: (GoogleMapController controller) {
-                    _mapController = controller;
-                  },
-                  markers: _marker != null ? {_marker!} : {},
-                  myLocationEnabled: true,
-                  myLocationButtonEnabled: true,
-                  onTap: (LatLng latLng) {
-                    _setMarker(latLng);
-                  },
-                ),
-              ),
+              child: MapScreen(), // Make sure MapScreen widget is defined
             ),
-            SizedBox(height: 10),
+            SizedBox(height: 15),
             Align(
               alignment: Alignment.centerRight,
               child: Padding(
@@ -125,7 +60,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                   onPressed: () {
-                    // /////////////////////////////
+                    // Implement weather check functionality here
                   },
                   child: const Text(
                     "How's Weather?",
@@ -138,7 +73,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
             ),
-            SizedBox(height: 10),
+            SizedBox(height: 15),
             Container(
               width: screenWidth * 0.9,
               padding: EdgeInsets.all(10),
@@ -150,7 +85,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Center(
-                    
                     child: Text(
                       weather.city,
                       style: const TextStyle(
@@ -178,6 +112,15 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
             SizedBox(height: 10),
+            // Corrected the redundant widget
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                WeatherCard(day: "Yesterday", morningTemp: -5.2, afternoonTemp: 1.0, nightTemp: -4.4),
+                WeatherCard(day: "Today", morningTemp: -8.2, afternoonTemp: 0.0, nightTemp: -4.4, isToday: true),
+                WeatherCard(day: "Tomorrow", morningTemp: -6.0, afternoonTemp: 2.0, nightTemp: -3.5),
+              ],
+            ),
           ],
         ),
       ),
