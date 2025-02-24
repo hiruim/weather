@@ -40,5 +40,3 @@ class WeatherCard extends StatelessWidget {
     );
   }
 }
-
-

@@ -1,19 +1,27 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:http/http.dart' as http;
 import 'package:latlong2/latlong.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:weather/config/app_assests.dart';
 
 class MapScreen extends StatefulWidget {
+  final Function(LatLng) onTap;
+
+  MapScreen({required this.onTap});
+
   @override
   _MapScreenState createState() => _MapScreenState();
 }
 
 class _MapScreenState extends State<MapScreen> {
   LatLng? _pinLocation;
-  LatLng? _currentLocation; 
+  LatLng? _currentLocation;
   final MapController _mapController = MapController();
+  String? weatherInfo = "Weather data will appear here";
 
   @override
   void initState() {
@@ -33,7 +41,9 @@ class _MapScreenState extends State<MapScreen> {
           _pinLocation = _currentLocation;
         });
 
+        // Move the map to the user's current location
         _mapController.move(_currentLocation!, 15.0);
+        _fetchWeatherData(position.latitude, position.longitude);
       } catch (e) {
         print("Error getting location: $e");
       }
@@ -42,68 +52,93 @@ class _MapScreenState extends State<MapScreen> {
     }
   }
 
+  Future<void> _fetchWeatherData(double latitude, double longitude) async {
+    final apiUrl =
+        "https://api.open-meteo.com/v1/forecast?latitude=$latitude&longitude=$longitude&current_weather=true";
+    try {
+      final response = await http.get(Uri.parse(apiUrl));
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        setState(() {
+          weatherInfo =
+              "Temperature: ${data['current_weather']['temperature']}°C";
+        });
+      } else {
+        print("Failed to fetch weather data");
+      }
+    } catch (e) {
+      print("Error fetching weather data: $e");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: FlutterMap(
-        mapController: _mapController,
-        options: MapOptions(
-          initialCenter: LatLng(0, 0),
-          initialZoom: 2.0,
-          onTap: (tapPosition, latLng) {
-            setState(() {
-              _pinLocation = latLng;
-              print(
-                  "first Pin Location: ${latLng.latitude}, ${latLng.longitude}");
-            });
-            print("New Pin Location: ${latLng.latitude}, ${latLng.longitude}");
-          },
-        ),
-        children: [
-          openStreetMapTileLayer,
-          if (_currentLocation != null)
-            MarkerLayer(
-              markers: [
-                Marker(
-                  point: _currentLocation!,
-                  width: 50,
-                  height: 50,
-                  child: Image.asset(
-                    AppAssets.location,
-                    color: Colors.blue,
+      body: _currentLocation == null
+          ? Center(child: CircularProgressIndicator())
+          : FlutterMap(
+              mapController: _mapController,
+              options: MapOptions(
+                initialCenter: _currentLocation ?? LatLng(0, 0),
+                initialZoom: 15.0,
+                onTap: (tapPosition, latLng) {
+                  setState(() {
+                    _pinLocation = latLng;
+                  });
+                  widget.onTap(latLng);
+                },
+              ),
+              children: [
+                TileLayer(
+                  urlTemplate:
+                      "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+                  userAgentPackageName: 'dev.fleaflet.flutter_map.example',
+                ),
+                if (_currentLocation != null)
+                  MarkerLayer(
+                    markers: [
+                      Marker(
+                        point: _currentLocation!,
+                        width: 50,
+                        height: 50,
+                        child: Image.asset(
+                          AppAssets.location,
+                          color: Colors.blue,
+                        ),
+                      ),
+                    ],
                   ),
-                ),
+                if (_pinLocation != null)
+                  MarkerLayer(
+                    markers: [
+                      Marker(
+                        point: _pinLocation!,
+                        width: 60,
+                        height: 60,
+                        child: Image.asset(AppAssets.mapPointerIcon),
+                      ),
+                    ],
+                  ),
               ],
             ),
-          if (_pinLocation != null)
-            MarkerLayer(
-              markers: [
-                Marker(
-                  point: _pinLocation!,
-                  width: 60,
-                  height: 60,
-                  child: Image.asset(AppAssets.mapPointerIcon),
-                ),
-              ],
-            ),
-        ],
-      ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           if (_pinLocation != null) {
             _mapController.move(_pinLocation!, 15.0);
+            _fetchWeatherData(_pinLocation!.latitude, _pinLocation!.longitude);
           }
         },
-        child: Image.asset(
-          AppAssets.location,
-          color: Colors.blue,
+        child: Image.asset(AppAssets.location, color: Colors.white),
+        backgroundColor: Colors.blue,
+      ),
+      bottomNavigationBar: Container(
+        padding: EdgeInsets.all(10),
+        color: Colors.white,
+        child: Text(
+          weatherInfo!,
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
       ),
     );
   }
-
-  TileLayer get openStreetMapTileLayer => TileLayer(
-        urlTemplate: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
-        userAgentPackageName: 'dev.fleaflet.flutter_map.example',
-      );
 }
