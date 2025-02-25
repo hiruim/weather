@@ -1,11 +1,14 @@
-import 'package:flutter/material.dart';
+import 'dart:io';
+
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:flutter/material.dart';
 
 class NoInternetDialog {
   static void show(BuildContext context) {
     showDialog(
       context: context,
       barrierDismissible: false,
+      barrierColor: Colors.black.withOpacity(0.85), // Dims the background
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
         title: Column(
@@ -34,13 +37,11 @@ class NoInternetDialog {
             child: Text("Retry", style: TextStyle(color: Colors.blue)),
           ),
           TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text("Ok"),
+            onPressed: () => exit(0),
+            child: Text("Close"),
           ),
         ],
       ),
     );
   }
 }
-
-

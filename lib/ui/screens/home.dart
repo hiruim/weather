@@ -1,3 +1,4 @@
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:geolocator/geolocator.dart';
@@ -7,6 +8,7 @@ import 'package:weather/bloc/weather/weather_event.dart';
 import 'package:weather/bloc/weather/weather_state.dart';
 import 'package:weather/config/text_styles.dart';
 import 'package:weather/ui/widgets/map.dart';
+import 'package:weather/ui/widgets/pop_up.dart';
 import 'package:weather/ui/widgets/weather_card.dart';
 import 'package:weather/ui/widgets/weather_data.dart';
 
@@ -26,6 +28,12 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _getUserLocation() async {
+    var connectivityResult = await Connectivity().checkConnectivity();
+    if (connectivityResult == ConnectivityResult.none) {
+      _showNoInternetDialog();
+      return;
+    }
+
     try {
       Position position = await Geolocator.getCurrentPosition(
           desiredAccuracy: LocationAccuracy.high);
@@ -35,6 +43,10 @@ class _HomeScreenState extends State<HomeScreen> {
     } catch (e) {
       print("Error fetching location: $e");
     }
+  }
+
+  void _showNoInternetDialog() {
+    NoInternetDialog.show(context);
   }
 
   @override
@@ -90,7 +102,14 @@ class _HomeScreenState extends State<HomeScreen> {
                             borderRadius: BorderRadius.circular(8),
                           ),
                         ),
-                        onPressed: () {
+                        onPressed: () async {
+                          var connectivityResult =
+                              await Connectivity().checkConnectivity();
+                          if (connectivityResult
+                              .contains(ConnectivityResult.none)) {
+                            _showNoInternetDialog();
+                            return;
+                          }
                           if (currentLocation != null) {
                             context.read<WeatherMapBloc>().add(
                                   FetchWeatherEvent(currentLocation!),
