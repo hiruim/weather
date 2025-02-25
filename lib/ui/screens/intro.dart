@@ -15,10 +15,9 @@ class IntroScreen extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            // Add <Widget> to specify the list type
             Text(
               "Find your weather",
-              style: IntroHeadingTextStyle(fontSize: 44),
+              style: IntroHeadingTextStyle(fontSize: screenWidth * 0.1),
             ),
             const SizedBox(height: 20),
             GestureDetector(
@@ -33,7 +32,7 @@ class IntroScreen extends StatelessWidget {
                 height: screenHeight * 0.4,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(25),
-                  image: DecorationImage(
+                  image: const DecorationImage(
                     image: AssetImage(AppAssets.weather),
                     fit: BoxFit.cover,
                   ),
