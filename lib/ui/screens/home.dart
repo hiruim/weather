@@ -150,8 +150,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   const SizedBox(height: 10),
                   Container(
-                    padding: const EdgeInsets.only(
-                        top: 2, bottom: 2), // Padding on two corners
+                    padding: const EdgeInsets.only(top: 2, bottom: 2),
                     child: SingleChildScrollView(
                       scrollDirection: Axis.horizontal,
                       child: Row(

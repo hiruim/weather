@@ -123,9 +123,9 @@ class _MapScreenState extends State<MapScreen> {
             ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          if (_pinLocation != null) {
-            _mapController.move(_pinLocation!, 15.0);
-            _fetchWeatherData(_pinLocation!.latitude, _pinLocation!.longitude);
+          if (_currentLocation != null) {
+            _mapController.move(_currentLocation!, 15.0);
+            _fetchWeatherData(_currentLocation!.latitude, _currentLocation!.longitude);
           }
         },
         child: Image.asset(AppAssets.location, color: Colors.white),

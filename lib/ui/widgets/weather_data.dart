@@ -52,7 +52,6 @@ class WeatherData {
         tomorrowNightTemp: 0.0,
       );
 
-  // Factory constructor to create from JSON
   factory WeatherData.fromJson(Map<String, dynamic> json) {
     List<double> hourlyTemps =
         List<double>.from(json['hourly']['temperature_2m']);
