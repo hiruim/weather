@@ -21,7 +21,7 @@ class _MapScreenState extends State<MapScreen> {
   LatLng? _pinLocation;
   LatLng? _currentLocation;
   final MapController _mapController = MapController();
-  String? weatherInfo = "Weather data will appear here";
+  String? weatherInfo = "Loading Your Current Weather.....";
 
   @override
   void initState() {
@@ -41,7 +41,6 @@ class _MapScreenState extends State<MapScreen> {
           _pinLocation = _currentLocation;
         });
 
-        // Move the map to the user's current location
         _mapController.move(_currentLocation!, 15.0);
         _fetchWeatherData(position.latitude, position.longitude);
       } catch (e) {
@@ -61,7 +60,7 @@ class _MapScreenState extends State<MapScreen> {
         final data = jsonDecode(response.body);
         setState(() {
           weatherInfo =
-              "Temperature: ${data['current_weather']['temperature']}°C";
+              "Your Temperature: ${data['current_weather']['temperature']}°C";
         });
       } else {
         print("Failed to fetch weather data");
@@ -125,7 +124,8 @@ class _MapScreenState extends State<MapScreen> {
         onPressed: () {
           if (_currentLocation != null) {
             _mapController.move(_currentLocation!, 15.0);
-            _fetchWeatherData(_currentLocation!.latitude, _currentLocation!.longitude);
+            _fetchWeatherData(
+                _currentLocation!.latitude, _currentLocation!.longitude);
           }
         },
         child: Image.asset(AppAssets.location, color: Colors.white),

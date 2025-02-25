@@ -138,15 +138,15 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Center(
-                          child: Text(
-                            weather.city.isNotEmpty
-                                ? weather.city
-                                : "Loading city...",
-                            style: const TextStyle(
-                                fontSize: 30, fontWeight: FontWeight.bold),
-                          ),
-                        ),
+                        // Center(
+                        //   child: Text(
+                        //     weather.city.isNotEmpty
+                        //         ? weather.city
+                        //         : "Loading city...",
+                        //     style: const TextStyle(
+                        //         fontSize: 30, fontWeight: FontWeight.bold),
+                        //   ),
+                        // ),
                         const SizedBox(height: 5),
                         Text("🌡 Temperature: ${weather.temperature}",
                             style: dataTextStyle()),

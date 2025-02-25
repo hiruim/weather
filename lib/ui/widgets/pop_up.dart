@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
+import 'package:weather/config/app_assests.dart';
 
 class NoInternetDialog {
   static void show(BuildContext context) {
@@ -13,7 +14,10 @@ class NoInternetDialog {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
         title: Column(
           children: [
-            Icon(Icons.error_outline, color: Colors.orange, size: 40),
+            Image.asset(
+              AppAssets.exclamation,
+              color: const Color.fromARGB(255, 245, 94, 34),
+            ),
             SizedBox(height: 10),
             Text(
               "No Internet Connection",
